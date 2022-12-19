@@ -1,0 +1,16 @@
+name: band_subset
+channels:
+  - pytorch
+  - nvidia                # only needed if using GPU with CUDA 11.1
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - cudatoolkit
+  - pip
+  - pytorch
+  - pip:
+    - wandb
+    - gym
+    - stable_baselines3
+    - scikit-learn
