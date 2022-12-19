@@ -7,4 +7,3 @@ src/auxiliary_self_test.py
 logs/
 output/
 wandb/
-.README.md
