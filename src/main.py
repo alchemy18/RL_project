@@ -11,6 +11,7 @@ from setproctitle import setproctitle as ptitle
 from normalized_env import NormalizedEnv
 import gym
 import wandb
+import torch
 import DRLBS
 import pickle
 
@@ -141,7 +142,7 @@ if __name__ == "__main__":
             for key in best_band_combinations:
                 state_key = [int(b) for b in key]
                 if bands is None:
-                    bands = state_key.to("cuda")
+                    bands = torch.tensor(state_key).to("cuda")
                     break
             test_band_subset(bands, weights_path, data_path)
         else:
