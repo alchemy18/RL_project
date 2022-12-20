@@ -16,7 +16,7 @@ import pickle
 wandb.init(project="band_subset", entity="rlproject___202218")
 
 env_name = 'BSEnv-v0'
-accuracy_threshold = 0.80
+accuracy_threshold = 0.6507  # All band val accuracy
 reward_penalty = 0.01
 n_bands = 200
 max_bands = 30
@@ -115,7 +115,7 @@ class HSIClassification(nn.Module):
         return x
 
 
-model = HSIClassification()
+model = HSIClassification().to("cuda")
 model.load_state_dict(weights)
 
 
@@ -159,9 +159,9 @@ val_dataloader = DataLoader(val_data, batch_size=64, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
 
 # band_mask
-band_mask = torch.Tensor(bands)
+band_mask = torch.Tensor(bands).to("cuda")
 
-model = HSIClassification()
+model = HSIClassification().to("cuda")
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 loss_fn = nn.CrossEntropyLoss()
 
@@ -172,6 +172,8 @@ for epoch in range(1000):
     accuracy = 0
     model.train()
     for x, y in train_dataloader:
+        x = x.to("cuda")
+        y = y.to("cuda")
         optimizer.zero_grad()
 
         output = model(x, band_mask)
@@ -185,6 +187,8 @@ for epoch in range(1000):
     accuracy_val = 0
     model.eval()
     for x, y in val_dataloader:
+        x = x.to("cuda")
+        y = y.to("cuda")
         output = model(x, band_mask)
         accuracy_val += (nn.Softmax(dim=1)(output).argmax(1) == y.argmax(1)).float().sum()
 
@@ -204,6 +208,8 @@ print(f"Best Val Accuracy (Selected {band_mask.sum().item()} Bands): {np.round(1
 accuracy_test = 0
 model.eval()
 for x, y in test_dataloader:
+    x = x.to("cuda")
+    y = y.to("cuda")
     output = model(x, band_mask)
     accuracy_test += (nn.Softmax(dim=1)(output).argmax(1) == y.argmax(1)).float().sum()
 

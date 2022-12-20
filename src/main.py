@@ -4,7 +4,7 @@
 import os
 import numpy as np
 import logging
-from train_test import train, test, train_band_subset
+from train_test import train, test, train_band_subset, test_band_subset
 import warnings
 from arg_parser import init_parser
 from setproctitle import setproctitle as ptitle
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     if args.env == 'BSEnv-v0':
         env_name = 'BSEnv-v0'
-        accuracy_threshold = 0.80
+        accuracy_threshold = 0.6507
         reward_penalty = 0.01
         n_bands = 200
         max_bands = 30
@@ -135,9 +135,17 @@ if __name__ == "__main__":
         }
         if args.env == 'BSEnv-v0':
             best_band_combinations = train_band_subset(**train_args)
-            with open(f'{args.save_model_dir}/best_band_combinations.pkl', 'wb') as handle:
+            with open(f'{args.save_model_dir}/sorted_best_band_combinations.pkl', 'wb') as handle:
                 pickle.dump(best_band_combinations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        train(**train_args)
+            bands = None
+            for key in best_band_combinations:
+                state_key = [int(b) for b in key]
+                if bands is None:
+                    bands = state_key.to("cuda")
+                    break
+            test_band_subset(bands, weights_path, data_path)
+        else:
+            train(**train_args)
 
 
     elif args.mode == 'test':
